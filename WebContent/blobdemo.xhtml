@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html>
+
+<!-- ===========================================================================
+blobdemo.xhtml - Arbeiten mit Blobs
+============================================================================ -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head></h:head>
+
+<h:body>
+	<ui:composition template="/master.xhtml">
+		<ui:define name="title">Patient Blob</ui:define>
+		<ui:define name="content">
+
+			<h:form id="blob_form_top">
+
+				<!--  ==================================================================   -->
+
+				<f:event type="preRenderView" listener="#{mb.preRenderAction }" />
+				<f:event type="postRenderView" listener="#{mb.postRenderAction}" />
+
+				<h2>JSF Blob Manager</h2>
+
+				<p:poll id="id_poll" interval="1" listener="#{mb.polProgress}"
+					rendered="#{mb.pollActive}" update="id_form_mp"
+					stop="#{! mb.pollActive}" autostart="false" />
+			</h:form>
+			<h:panelGroup rendered="#{mb.noPic}">
+				<h:form id="id_form_mp" enctype="multipart/form-data">
+					<h3>Upload</h3>
+					<h:outputText value="#{mb.uploadMessage}"
+						rendered="#{! mb.inProgress}" />
+					<h:outputText value="Bitte warten: #{mb.uploadTime}"
+						rendered="#{mb.inProgress}" />
+					<p />File name: &#160;
+  						<h:inputFile id="id_inpFile" validator="#{mb.validateFile}"
+						title="Browse your file system" disabled="#{mb.inProgress}"
+						valueChangeListener="#{mb.vclUploadFile}" label="File name"
+						columns="200" value="#{mb.part}">
+					</h:inputFile>
+
+					<p />
+					<h:commandButton value="Upload"
+						actionListener="#{mb.aclFileUpload}" disabled="#{mb.inProgress}" />
+				</h:form>
+			</h:panelGroup>
+			<p />
+			<hr />
+			<p />
+			<p:dialog modal="true" widgetVar="statusDialog" header="Status"
+				draggable="false" closable="false" resizable="false">
+				<p:graphicImage name="/img/ajaxloadingbar.gif" />
+			</p:dialog>
+
+			<h:form id="blob_form">
+				<h3>Download</h3>
+				<p />
+
+
+    &#160;&#160;
+    <p:commandButton value="Download" ajax="false"
+					onclick="PrimeFaces.monitorDownload( start, stop );"
+					icon="ui-icon-arrowthick-1-s"
+					actionListener="#{mb.aclFileDownload}">
+					<p:fileDownload value="#{mb.streamedContent}" />
+				</p:commandButton>
+
+    &#160;&#160;
+    <p:commandButton value="Delete" ajax="false"
+					actionListener="#{mb.aclFileDelete}" />
+
+				<script type="text/javascript">
+					function start() {
+						PF('statusDialog').show();
+					}
+					function stop() {
+						PF('statusDialog').hide();
+					}
+				</script>
+				<p />
+
+				<p>#{mb.ebCurrent}</p>
+				<p>#{mb.picText}</p>
+				<p:graphicImage value="#{mb.streamedPic}" stream="false"
+					styleClass="images" />
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

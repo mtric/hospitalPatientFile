@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<!-- ===========================================================================
+help.xhtml - Hilfeseite für den User mit Informationen, falls dieser
+noch keine Logindaten hat.   
+============================================================================ -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head></h:head>
+<h:body>
+	<ui:composition template="/master.xhtml">
+		<ui:define name="title">Login</ui:define>
+		<ui:define name="content">
+			<!-- ==========================  Hilfe Deutsch ===============================  -->
+			<h:panelGroup rendered="#{!login.english}">
+			<h2>Hilfe</h2>
+			<p>Wenn sie <b>Hilfe beim Login</b> benötigen, ihr <b>Passwort vergessen</b> haben <br />
+			oder einen <b>neuen Account</b> erstellen wollen, dann wenden sie sich bitte <br />
+			an den zuständigen <b>Netzwerkadministrator</b>.</p>
+			<hr/>
+			<h:commandButton value="Zurück" action="login.xhtml" />
+			</h:panelGroup>
+			
+			<!--  ================ Help English ================ -->
+			<h:panelGroup rendered="#{login.english}">
+			<h2>Help</h2>
+			<p>If you need <b>help with the login</b>, <b>forgot your password</b><br />
+			or want to <b>create a new account</b>, then please contact your<br />
+			local <b>network administrator</b>.</p>
+			<hr/>
+			<h:commandButton value="Back" action="login.xhtml" />
+			</h:panelGroup>
+
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

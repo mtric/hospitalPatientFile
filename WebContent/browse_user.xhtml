@@ -1,0 +1,430 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html>
+
+<!-- ===========================================================================
+browse_user.xhtml - Die Seite demonstriert den Zugriff auf eine Datenbanktabelle. 
+Der user kann search queries ausführen und bekommt die Ergebnisse in einer
+Datentabelle angezeigt.
+============================================================================ -->
+
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+<h:head></h:head>
+
+
+<h:body>
+	<ui:composition template="/master.xhtml">
+		<ui:define name="title">Patientenakte</ui:define>
+		<ui:define name="content">
+			<!-- ================================================================== -->
+
+			<f:event type="preRenderView" listener="#{MbBrowse.preRenderAction }" />
+			<f:event type="postRenderView"
+				listener="#{MbBrowse.postRenderAction}" />
+				
+			<!-- ==================== SUCHPARSER ==================== -->	
+			<!-- ==================== Deutsch ==================== -->
+			<h:panelGroup rendered="#{!login.english}">
+				<h1>Patientensuche und Bearbeitung</h1>
+				
+				<h:panelGroup>
+					<h2>Bitte geben Sie die Suchkriterien ein.</h2>
+
+			<!-- ==================== Eingabefenster ==================== -->
+					<h:form>
+						<h:panelGrid columnClass="centered" id="search_panel" columns="6"
+							border="2" layout="grid" bgcolor="lightgrey" cellpadding="2"
+							cellspacing="5">
+							<h:outputLabel value="Vorname" />
+							<h:inputText label="Vorname" value="#{MbBrowse.preName}"
+								maxlength="60" />
+							<h:outputLabel value="Nachname" />
+							<h:inputText label="Nachname" value="#{MbBrowse.famName}"
+								maxlength="60" />
+							<h:outputLabel value="Geburtsdatum" />
+							<h:inputText id="id_geburtstag" label="Geburtstag" maxlength="10"
+								value="#{MbBrowse.birthDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+							</h:inputText>
+
+							<h:outputLabel value="E-Mail" />
+							<h:inputText label="E-Mail" value="#{MbBrowse.eMail}"
+								maxlength="45" />
+							<h:outputLabel value="Tel-Nr" />
+							<h:inputText label="Tel-Nr" value="#{MbBrowse.telNr}"
+								maxlength="45" />
+							<h:outputLabel value="Krankenkasse" />
+							<h:inputText label="Krankenkasse" value="#{MbBrowse.healthIns}"
+								maxlength="45" />
+
+							<h:outputLabel value="Einlieferung" />
+							<h:inputText id="id_einlieferung" label="Einlieferungsdatum"
+								maxlength="10" value="#{MbBrowse.inDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+							</h:inputText>
+							<h:outputLabel value="Entlassung" />
+							<h:inputText id="id_entlassung" label="Entlassungsdatum"
+								maxlength="10" value="#{MbBrowse.outDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+								<f:param
+									value="#{MbBrowse.outDate!=null?MbBrowse.outDate:MbBrowse.noDate}" />
+							</h:inputText>
+						</h:panelGrid>
+					</h:form>
+				</h:panelGroup>
+				<br />
+				
+				<!-- ==================== Buttons ==================== -->
+
+				<h:panelGroup>
+					<h:panelGrid styleClass="panelGridCenter" id="button_panel1"
+						columns="4" border="1" layout="grid" bgcolor="lightgrey"
+						cellpadding="2" cellspacing="5">
+						<h:panelGroup style="display:block; text-align:center">
+
+							<h:commandButton value="Suche starten"
+								disabled="#{ ! MbBrowse.connected}" title="Suche starten"
+								style="font-size: 130%;" actionListener="#{MbBrowse.searchU}"
+								update="@form">
+							</h:commandButton>
+							
+							<h:commandButton value="Suckriterien löschen" 
+								disabled="#{ ! MbBrowse.connected}" title="Suchkriterien löschenn"
+								style="font-size: 130%;" actionListener="#{MbBrowse.reset}" render="input_form"
+								update="@form">
+							</h:commandButton>
+							
+							<h:commandButton value="Ausloggen"
+								disabled="#{ ! MbBrowse.connected}" title="Verbindung abbrechen"
+								actionListener="#{MbBrowse.disconnect}" style="font-size: 130%;"
+								action="login.xhtml" />
+							
+						</h:panelGroup>
+					</h:panelGrid>
+					
+					<h:panelGrid styleClass="panelGridCenter" id="button_panel2"
+						columns="3" border="1" layout="grid" bgcolor="lightgrey"
+						cellpadding="2" cellspacing="5">
+
+						<h:panelGroup style="display:block; text-align:center">
+
+							<h:commandButton value="Datensatz einfügen"
+								disabled="#{ ! MbBrowse.connected}" title="Datensatz einfügen"
+								style="font-size: 130%;" actionListener="#{MbBrowse.insert}"
+								update="@form">
+							</h:commandButton>
+
+							<h:commandButton value="Datensatz aktualisieren"
+								disabled="#{ ! MbBrowse.connected}"
+								title="Datensatz aktualisieren" style="font-size: 130%;"
+								actionListener="#{MbBrowse.updateU}" update="@form">
+							</h:commandButton>
+
+							<h:commandButton value="Datensatz löschen"
+								disabled="#{ ! MbBrowse.connected}" title="Datensatz löschen"
+								style="font-size: 130%;" actionListener="#{MbBrowse.delete}">
+							</h:commandButton>									
+						</h:panelGroup>
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<!-- ==================== Ausgabetabelle ==================== -->
+
+				<p>
+					Folgende Patienten wurden gefunden:
+				</p>
+				<h:panelGroup>
+					<div class="divTable">
+						<h:dataTable value="#{arr.patient}" binding="#{MbBrowse.datatablePatients}"
+							var="patient" styleClass="patientTable"
+							headerClass="patientTableHeader"
+							
+							rowClasses="patientTableOddRow, patientTableEvenRow">
+							<f:facet name="header">Patienten Behandlungsdaten</f:facet>
+							<h:column>
+								<f:facet name="header">ID</f:facet>
+								<h:inputText value="#{patient.pID}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.pID} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Vorname</f:facet>
+								<h:inputText value="#{patient.preName}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.preName} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Nachname</f:facet>
+								<h:inputText value="#{patient.famName}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.famName} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Geburtsdatum</f:facet>
+								<h:inputText value="#{patient.birthDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.birthDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">E-Mail</f:facet>
+								<h:inputText value="#{patient.eMail}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.eMail} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Telefon</f:facet>
+								<h:inputText value="#{patient.telNr}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.telNr} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Krankenkasse</f:facet>
+								<h:inputText value="#{patient.healthIns}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.healthIns} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Einlieferung</f:facet>
+								<h:inputText value="#{patient.inDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.inDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Entlassung</f:facet>
+								<h:inputText value="#{patient.outDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.outDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Dokument</f:facet>
+						<h:commandButton value="show" action="blobdemo.xhtml" actionListener="#{MbBrowse.attrListener}"> 
+								<!-- ============ Parameter senden================= -->
+						<f:attribute name="blobID" value="#{patient.blobID}" />
+								</h:commandButton> 
+	
+					  		<h:commandButton value="transfer" title="transfer" actionListener="#{MbBrowse.transferU}"/>
+							</h:column>
+						</h:dataTable>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
+			
+<!-- ========================================================================================= -->			
+			<!-- ==================== English =========================== -->
+			<h:panelGroup rendered="#{login.english}">
+			<h1>Patient search and processing</h1>
+				
+				<h:panelGroup>
+					<h2>Please enter the keywords.</h2>
+
+			<!-- ==================== Eingabefenster ==================== -->
+					<h:form>
+						<h:panelGrid columnClass="centered" id="search_panel" columns="6"
+							border="2" layout="grid" bgcolor="lightgrey" cellpadding="2"
+							cellspacing="5">
+							<h:outputLabel value="First name" />
+							<h:inputText label="Vorname" value="#{MbBrowse.preName}"
+								maxlength="60" />
+							<h:outputLabel value="Surname" />
+							<h:inputText label="Nachname" value="#{MbBrowse.famName}"
+								maxlength="60" />
+							<h:outputLabel value="Date of birth" />
+							<h:inputText id="id_geburtstag" label="Geburtstag" maxlength="10"
+								value="#{MbBrowse.birthDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+							</h:inputText>
+
+							<h:outputLabel value="E-Mail" />
+							<h:inputText label="E-Mail" value="#{MbBrowse.eMail}"
+								maxlength="45" />
+							<h:outputLabel value="Phone" />
+							<h:inputText label="Tel-Nr" value="#{MbBrowse.telNr}"
+								maxlength="45" />
+							<h:outputLabel value="Health insurance" />
+							<h:inputText label="Krankenkasse" value="#{MbBrowse.healthIns}"
+								maxlength="45" />
+
+							<h:outputLabel value="Admission" />
+							<h:inputText id="id_einlieferung" label="Einlieferungsdatum"
+								maxlength="10" value="#{MbBrowse.inDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+							</h:inputText>
+							<h:outputLabel value="Discharge" />
+							<h:inputText id="id_entlassung" label="Entlassungsdatum"
+								maxlength="10" value="#{MbBrowse.outDate}">
+								<f:convertDateTime locale="de_DE" pattern="dd.MM.yyyy"
+									type="date" dateStyle="short" timeZone="MET" />
+								<f:param
+									value="#{MbBrowse.outDate!=null?MbBrowse.outDate:MbBrowse.noDate}" />
+							</h:inputText>
+						</h:panelGrid>
+					</h:form>
+				</h:panelGroup>
+				<br />
+				
+				<!-- ==================== Buttons ==================== -->
+
+				<h:panelGroup>
+					<h:panelGrid styleClass="panelGridCenter" id="button_panel1E"
+						columns="4" border="1" layout="grid" bgcolor="lightgrey"
+						cellpadding="2" cellspacing="5">
+						<h:panelGroup style="display:block; text-align:center">
+
+							<h:commandButton value="Search"
+								disabled="#{ ! MbBrowse.connected}" title="Suche starten"
+								style="font-size: 130%;" actionListener="#{MbBrowse.searchU}"
+								update="@form">
+							</h:commandButton>
+							
+							<h:commandButton value="Clear keywords" 
+								disabled="#{ ! MbBrowse.connected}" title="Suchkriterien löschenn"
+								style="font-size: 130%;" actionListener="#{MbBrowse.resetU}" render="input_form"
+								update="@form">
+							</h:commandButton>
+							
+							<h:commandButton value="Logout"
+								disabled="#{ ! MbBrowse.connected}" title="Verbindung abbrechen"
+								actionListener="#{MbBrowse.disconnect}" style="font-size: 130%;"
+								action="login.xhtml" />
+							
+						</h:panelGroup>
+					</h:panelGrid>
+					
+					<h:panelGrid styleClass="panelGridCenter" id="button_panel2E"
+						columns="3" border="1" layout="grid" bgcolor="lightgrey"
+						cellpadding="2" cellspacing="5">
+
+						<h:panelGroup style="display:block; text-align:center">
+
+							<h:commandButton value="Insert record"
+								disabled="#{ ! MbBrowse.connected}" title="Datensatz einfügen"
+								style="font-size: 130%;" actionListener="#{MbBrowse.insert}"
+								update="@form">
+							</h:commandButton>
+
+							<h:commandButton value="Update record"
+								disabled="#{ ! MbBrowse.connected}"
+								title="Datensatz aktualisieren" style="font-size: 130%;"
+								actionListener="#{MbBrowse.updateU}" update="@form">
+							</h:commandButton>
+
+							<h:commandButton value="Delete record"
+								disabled="#{ ! MbBrowse.connected}" title="Datensatz löschen"
+								style="font-size: 130%;" actionListener="#{MbBrowse.delete}">
+							</h:commandButton>											
+						</h:panelGroup>
+					</h:panelGrid>
+				</h:panelGroup>
+
+				<!-- ==================== Ausgabetabelle ==================== -->
+
+				<p>
+					The following patients were found:
+				</p>
+				<h:panelGroup>
+					<div class="divTable">
+					<!-- binding="#{MbBrowse.datatablePatients} -->
+						<h:dataTable value="#{arr.patient}"
+							var="patient" styleClass="patientTable"
+							headerClass="patientTableHeader"
+							
+							rowClasses="patientTableOddRow, patientTableEvenRow">
+							<f:facet name="header">Treatment data</f:facet>
+							<h:column>
+								<f:facet name="header">ID</f:facet>
+								<h:inputText value="#{patient.pID}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.pID} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">First name</f:facet>
+								<h:inputText value="#{patient.preName}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.preName} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Surname</f:facet>
+								<h:inputText value="#{patient.famName}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.famName} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Date of birth</f:facet>
+								<h:inputText value="#{patient.birthDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.birthDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">E-Mail</f:facet>
+								<h:inputText value="#{patient.eMail}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.eMail} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Phone</f:facet>
+								<h:inputText value="#{patient.telNr}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.telNr} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Health insurance</f:facet>
+								<h:inputText value="#{patient.healthIns}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.healthIns} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Admission</f:facet>
+								<h:inputText value="#{patient.inDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.inDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Discharge</f:facet>
+								<h:inputText value="#{patient.outDate}" size="10"
+									rendered="#{patient.canEdit}" />
+								<h:outputText value="#{patient.outDate} &#160;"
+									rendered="#{not patient.canEdit}" />
+							</h:column>
+							<h:column>
+								<f:facet name="header">Document</f:facet>
+					  		<h:commandButton value="show" action="blobdemo.xhtml" actionListener="#{MbBrowse.attrListener}"> 
+								<!-- ============ Parameter senden================= -->
+						<f:attribute name="blobID" value="#{patient.blobID}" />
+								</h:commandButton> 
+					  		<h:commandButton value="transfer" title="transfer" actionListener="#{MbBrowse.transferU}"/>
+							</h:column>
+						</h:dataTable>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
+			<!--  ===================================================================  -->
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<!-- ===========================================================================
+login.xhtml - Startseite für den Login zur Datenbank
+============================================================================ -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+<h:head></h:head>
+<h:body>
+	<ui:composition template="/master.xhtml">
+		<ui:define name="title">Login</ui:define>
+		<ui:define name="content">
+			<!-- ==========================  Login Deutsch ===============================  -->
+			<br/><br/>
+			<h:panelGroup class="login_panel" rendered="#{!login.loggedIn and !login.english}">
+				<h:panelGrid class="login_grid" columns="2">
+					<f:facet name="footer">
+						<h:commandButton value="Login" action="#{login.loginCheck}"/>			
+					</f:facet>
+					Kennung
+					<h:inputText titel="Kennung" required="true" value="#{login.kennung}"
+						requiredMessage="Kennung fehlt" size="25" />
+					Passwort
+					<h:inputSecret titel="Passwort" value="#{login.pw}" required="true"
+						requiredMessage="Passwort fehlt" size="25">
+						<f:validateLength minimum="4" />
+					</h:inputSecret>
+					<h:outputText value="Anmeldung mit " />
+					<strong>Kennung</strong> und <strong>Passwort</strong>
+					<p />
+				</h:panelGrid>
+				<h:commandLink value="Hilfe bei der Anmeldung" action="help.xhtml" /> <br />
+			</h:panelGroup>
+						<!-- ==========================  Login English ===============================  -->
+			<h:panelGroup class="login_panel" rendered="#{!login.loggedIn and login.english}">
+				<h:panelGrid class="login_grid" columns="2">
+					<f:facet name="footer">
+						<h:commandButton value="Login" action="#{login.loginCheck}" />
+					</f:facet>
+					User name
+					<h:inputText titel="User" required="true" value="#{login.kennung}"
+						requiredMessage="User name is missing" size="25" />
+					Password
+					<h:inputSecret titel="Password" value="#{login.pw}" required="true"
+						requiredMessage="Password is missing" size="25">
+						<f:validateLength minimum="4" />
+					</h:inputSecret>
+					<h:outputText value="Login with " />
+					<strong>user name</strong> und <strong>password</strong>
+					<p />
+				</h:panelGrid>
+				<h:commandLink value="Login help" action="help.xhtml" /> <br />
+			</h:panelGroup>
+			<!-- ======================  Logout und Kennung Deutsch ========================  -->
+			<h:panelGrid columns="1" rendered="#{login.loggedIn and !login.english}">
+				<h:commandButton value="Logout" actionListener="#{login.aclLogout}" />
+			</h:panelGrid>
+			<!-- ======================  Logout und Kennung Englisch ========================  -->
+			<h:panelGrid columns="1" rendered="#{login.loggedIn and login.english}">
+				<h:commandButton value="Logout" actionListener="#{login.aclLogout}" />
+			</h:panelGrid>
+			<!-- ==========================  Pics  =============================== -->
+			<br/><br/><br/>
+			<div id="stapel">
+					<img src="resources/img/image1.png" alt="Bild1"></img>
+					<img src="resources/img/image2.png"	alt="Bild2"></img>
+					<img src="resources/img/image3.png" alt="Bild3"></img>
+					<img src="resources/img/image4.png" alt="Bild1"></img>
+					<img src="resources/img/image5.png" alt="Bild3"></img>
+			</div>
+			
+		</ui:define>
+	</ui:composition>
+</h:body>
+</html>

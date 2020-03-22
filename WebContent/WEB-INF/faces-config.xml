@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE faces-config>
+
+<!-- ===========================================================================
+  faces-config.xml - JSF 2.3 Konfigurationsdatei
+  Verzeichnis: {Projekt}/WebContent/WEB-INF/
+  Version: 1.0.2, 2017-07-01, wkl
+============================================================================ -->
+
+<faces-config version="2.3" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"                            
+              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee  
+              http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_3.xsd"> 
+              
+  <application>
+    
+    <locale-config>
+      <default-locale>de</default-locale>
+      <supported-locale>en</supported-locale>
+    </locale-config>
+    
+  </application>
+  
+    <navigation-rule>
+    
+    <from-view-id>/login.xhtml</from-view-id>
+    
+    <navigation-case>
+      <from-outcome>user</from-outcome>
+      <to-view-id>/browse_user.xhtml</to-view-id>
+    </navigation-case>
+    
+    <navigation-case>
+      <from-outcome>admin</from-outcome>
+      <to-view-id>/browse_admin.xhtml</to-view-id>
+     <!--  <redirect/> --> 
+    </navigation-case>
+    
+  </navigation-rule>
+
+  <managed-bean>
+    <managed-bean-name>mb_db</managed-bean-name>
+    <managed-bean-class>patientFile.MbDb</managed-bean-class>
+    <managed-bean-scope>application</managed-bean-scope>
+
+    <managed-property>
+      <description>true: Connections werden über einen Connection pool 
+                         verwaltet
+      </description>
+      <property-name>use_pool</property-name>
+      <value>false</value>      
+    </managed-property>
+        
+    <managed-property>
+      <property-name>user</property-name>
+      <value>USER356603_root1</value>
+    </managed-property>
+    
+    <managed-property>
+      <property-name>pw</property-name>
+      <value>jF69gD5vs8qCark</value>
+    </managed-property>
+    
+    <managed-property>
+      <property-name>constr</property-name>
+      <value>jdbc:mysql://kaleve.lima-db.de:3306/db_356603_4</value>
+    </managed-property>
+    
+    <managed-property>
+      <property-name>logfile</property-name>
+      <value>/var/log/tomcat/browse.log</value>
+    </managed-property>    
+  </managed-bean>
+    
+</faces-config>

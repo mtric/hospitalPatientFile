@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html>
+
+<!-- ===========================================================================
+header.xhtml - Standard Header Seite
+============================================================================ -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head></h:head>
+
+<h:body>
+
+	<div class="header">
+		<!--  ================ German ================ -->
+		<h:panelGroup rendered="#{!login.english}">
+			<p:menuButton value="Sprache" style="float: right;">
+				<p:menuitem id="de1" value="Deutsch" icon="flagge_de"
+					immediate="true" ajax="false" action="#{login.Language(1)}" />
+				<p:menuitem id="en1" value="Englisch" icon="flagge_en"
+					immediate="true" ajax="false" action="#{login.Language(2)}" />
+			</p:menuButton>
+		</h:panelGroup>
+		<!--  ================ English ================ -->
+		<h:panelGroup rendered="#{login.english}">
+			<p:menuButton value="Language" style="float: right;">
+				<p:menuitem id="de2" value="German" icon="flagge_de"
+					immediate="true" ajax="false" action="#{login.Language(1)}" />
+				<p:menuitem id="en2" value="English" icon="flagge_en"
+					immediate="true" ajax="false" action="#{login.Language(2)}" />
+			</p:menuButton>
+		</h:panelGroup>
+		<h:panelGrid columns="2">
+			<h:graphicImage library="img" name="java_transp.png" alt="Logo"
+				height="30" />
+			<!--  ================ German ================ -->
+			<h:panelGroup rendered="#{!login.english}">
+				<h:outputText styleClass="branding"
+					value="webDev Projekt digitale Patientenakte" />
+			</h:panelGroup>
+			<!--  ================ English ================ -->
+			<h:panelGroup rendered="#{login.english}">
+				<h:outputText styleClass="branding"
+					value="webDev project digital patient file" />
+			</h:panelGroup>
+			<!--  ================ German ================ -->
+			<h:panelGroup rendered="#{login.loggedIn and !login.english}">
+			Angemeldet als <strong>#{login.kennung}</strong>
+			</h:panelGroup>
+			<!--  ================ English ================ -->
+			<h:panelGroup rendered="#{login.loggedIn and login.english}">
+			Logged in as <strong>#{login.kennung}</strong>
+			</h:panelGroup>
+		</h:panelGrid>
+	</div>
+
+</h:body>
+
+</html>
